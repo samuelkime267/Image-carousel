@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "./button.scss", "./titles.scss";
+
+* {
+  font-family: var(--font-roboto-flex);
+}
