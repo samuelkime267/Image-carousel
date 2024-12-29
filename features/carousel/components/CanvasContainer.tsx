@@ -8,7 +8,7 @@ import { Stats } from "@react-three/drei";
 export default function CanvasContainer() {
   return (
     <div className="fixed top-0 left-0 w-full h-full">
-      <Leva />
+      <Leva collapsed />
       <Canvas dpr={1}>
         <Stats />
         <Experience />

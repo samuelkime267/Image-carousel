@@ -16,6 +16,15 @@ type imgType = {
   activeImgIndex: number;
   activeWidth: number;
   setActiveImgIndex: React.Dispatch<React.SetStateAction<number>>;
+  group: number;
+  activeGroup: number;
+  setActiveGroup: React.Dispatch<React.SetStateAction<number>>;
+  setIteration: React.Dispatch<
+    React.SetStateAction<{
+      curIteration: number;
+      nextIteration: number;
+    }>
+  >;
 };
 
 export default function Img({
@@ -28,8 +37,13 @@ export default function Img({
   activeImgIndex,
   activeWidth,
   setActiveImgIndex,
+  group,
+  setActiveGroup,
+  setIteration,
+  activeGroup,
 }: imgType) {
   const isActive = index === activeImgIndex;
+  const centerImgIndex = Math.floor(length / 2);
   const shaderMaterial = useRef<THREE.ShaderMaterial>(null);
 
   useEffect(() => {
@@ -71,7 +85,6 @@ export default function Img({
     imgIndex: number
   ) => {
     const distanceToFirstImg = activeWidth / 2 + width / 2 + gap;
-    const centerImgIndex = Math.floor(length / 2);
 
     if (isActive) {
       if (activeImgIndex === centerImgIndex) {
@@ -101,6 +114,24 @@ export default function Img({
     <>
       <mesh
         onClick={() => {
+          const clickedGroup = group;
+          setIteration((iteration) => {
+            const isPosRight = index >= centerImgIndex;
+            const curIteration =
+              activeGroup === clickedGroup
+                ? iteration.curIteration
+                : iteration.nextIteration;
+
+            const nextIteration =
+              activeGroup === clickedGroup
+                ? iteration.curIteration
+                : iteration.nextIteration;
+            return {
+              curIteration,
+              nextIteration: isPosRight ? nextIteration + 1 : nextIteration - 1,
+            };
+          });
+          setActiveGroup(group);
           setActiveImgIndex(index);
         }}
         position={[getPos(isActive, activeImgIndex, index), 0, 0]}
