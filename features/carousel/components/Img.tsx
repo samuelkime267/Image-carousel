@@ -70,22 +70,29 @@ export default function Img({
     activeImgIndex: number,
     imgIndex: number
   ) => {
-    // console.log({ activeImgIndex, imgIndex, length });
-
-    if (isActive) return 0;
     const distanceToFirstImg = activeWidth / 2 + width / 2 + gap;
+    const centerImgIndex = Math.floor(length / 2);
+
+    if (isActive) {
+      if (activeImgIndex === centerImgIndex) {
+        return 0;
+      }
+      if (activeImgIndex > centerImgIndex) {
+        return (width + gap) * (imgIndex - centerImgIndex);
+      } else {
+        return -(width + gap) * (centerImgIndex - imgIndex);
+      }
+    }
 
     // order: 3d, sports, architecture, animals, fashion, food, nature
-
     if (activeImgIndex > imgIndex) {
       return -(
         distanceToFirstImg -
-        (width + gap) * (imgIndex - activeImgIndex + 1)
+        (width + gap) * (imgIndex - centerImgIndex + 1)
       );
     } else {
       return (
-        distanceToFirstImg +
-        (width + gap) * (imgIndex - Math.floor(length / 2) - 1)
+        distanceToFirstImg + (width + gap) * (imgIndex - centerImgIndex - 1)
       );
     }
   };
@@ -94,16 +101,9 @@ export default function Img({
     <>
       <mesh
         onClick={() => {
-          // console.log({ index, length, activeImgIndex });
-
           setActiveImgIndex(index);
         }}
         position={[getPos(isActive, activeImgIndex, index), 0, 0]}
-        // position={[
-        //   (width + gap) * index - ((width + gap) * (length - 1)) / 2,
-        //   0,
-        //   0,
-        // ]}
       >
         <planeGeometry args={[isActive ? activeWidth : width, height]} />
         <shaderMaterial
