@@ -5,20 +5,37 @@ import React, { useEffect, useMemo, useRef } from "react";
 import fragmentShader from "../shaders/fragment.glsl";
 import vertexShader from "../shaders/vertex.glsl";
 import { useTexture } from "@react-three/drei";
+import gsap from "gsap";
 
 type imgType = {
   img: string;
   width: number;
   height: number;
-  index: number;
+  imgIndex: number;
   gap: number;
   length: number;
-  activeImgIndex: number;
+  activeImgIndex: {
+    activeImgIndex: number;
+    prevActiveImgIndex: number;
+  };
   activeWidth: number;
-  setActiveImgIndex: React.Dispatch<React.SetStateAction<number>>;
+  setActiveImgIndex: React.Dispatch<
+    React.SetStateAction<{
+      activeImgIndex: number;
+      prevActiveImgIndex: number;
+    }>
+  >;
   group: number;
-  activeGroup: number;
-  setActiveGroup: React.Dispatch<React.SetStateAction<number>>;
+  activeGroup: {
+    activeGroup: number;
+    prevGroup: number;
+  };
+  setActiveGroup: React.Dispatch<
+    React.SetStateAction<{
+      activeGroup: number;
+      prevGroup: number;
+    }>
+  >;
   setIteration: React.Dispatch<
     React.SetStateAction<{
       curIteration: number;
@@ -32,7 +49,7 @@ export default function Img({
   img,
   width,
   gap,
-  index,
+  imgIndex,
   length,
   activeImgIndex,
   activeWidth,
@@ -42,23 +59,39 @@ export default function Img({
   setIteration,
   activeGroup,
 }: imgType) {
-  const isActive = index === activeImgIndex;
+  const isActive = imgIndex === activeImgIndex.activeImgIndex;
   const centerImgIndex = Math.floor(length / 2);
   const shaderMaterial = useRef<THREE.ShaderMaterial>(null);
+  const planeMesh = useRef<THREE.Mesh>(null);
 
+  // This effect updates the plane width
   useEffect(() => {
-    if (shaderMaterial.current && !isActive) {
-      shaderMaterial.current.uniforms.uRes.value = new THREE.Vector2(
-        width,
-        height
-      );
+    if (!planeMesh.current) return;
+    if (isActive) {
+      gsap.to(planeMesh.current.scale, {
+        x: activeWidth,
+      });
+    } else {
+      gsap.to(planeMesh.current.scale, {
+        x: width,
+      });
     }
+  }, [isActive, activeWidth, width]);
 
-    if (shaderMaterial.current && isActive) {
-      shaderMaterial.current.uniforms.uRes.value = new THREE.Vector2(
-        activeWidth,
-        height
-      );
+  // This effect updates the plane resolution in the shader
+  useEffect(() => {
+    if (!shaderMaterial.current) return;
+
+    if (isActive) {
+      gsap.to(shaderMaterial.current.uniforms.uRes.value, {
+        x: activeWidth,
+        y: height,
+      });
+    } else {
+      gsap.to(shaderMaterial.current.uniforms.uRes.value, {
+        x: width,
+        y: height,
+      });
     }
   }, [height, width, isActive, activeWidth]);
 
@@ -79,64 +112,83 @@ export default function Img({
     return uniforms;
   }, [texture]);
 
-  const getPos = (
-    isActive: boolean,
-    activeImgIndex: number,
-    imgIndex: number
-  ) => {
+  // This effect updates the plane position
+  useEffect(() => {
+    if (!planeMesh.current) return;
+
     const distanceToFirstImg = activeWidth / 2 + width / 2 + gap;
+    let position = 0;
 
     if (isActive) {
-      if (activeImgIndex === centerImgIndex) {
-        return 0;
+      if (activeImgIndex.activeImgIndex === centerImgIndex) {
+        position = 0;
       }
-      if (activeImgIndex > centerImgIndex) {
-        return (width + gap) * (imgIndex - centerImgIndex);
+      if (activeImgIndex.activeImgIndex > centerImgIndex) {
+        position = (width + gap) * (imgIndex - centerImgIndex);
       } else {
-        return -(width + gap) * (centerImgIndex - imgIndex);
+        position = -(width + gap) * (centerImgIndex - imgIndex);
       }
     }
 
-    // order: 3d, sports, architecture, animals, fashion, food, nature
-    if (activeImgIndex > imgIndex) {
-      return -(
+    // // order: 3d, sports, architecture, animals, fashion, food, nature
+    if (activeImgIndex.activeImgIndex > imgIndex) {
+      position = -(
         distanceToFirstImg -
         (width + gap) * (imgIndex - centerImgIndex + 1)
       );
-    } else {
-      return (
-        distanceToFirstImg + (width + gap) * (imgIndex - centerImgIndex - 1)
-      );
     }
-  };
+    if (activeImgIndex.activeImgIndex < imgIndex) {
+      position =
+        distanceToFirstImg + (width + gap) * (imgIndex - centerImgIndex - 1);
+    }
+
+    gsap.to(planeMesh.current.position, { x: position });
+  }, [
+    activeImgIndex,
+    activeWidth,
+    centerImgIndex,
+    gap,
+    imgIndex,
+    isActive,
+    width,
+  ]);
 
   return (
     <>
       <mesh
+        ref={planeMesh}
         onClick={() => {
           const clickedGroup = group;
           setIteration((iteration) => {
-            const isPosRight = index >= centerImgIndex;
+            const isPosRight = imgIndex >= centerImgIndex;
+
             const curIteration =
-              activeGroup === clickedGroup
+              activeGroup.activeGroup === clickedGroup
                 ? iteration.curIteration
                 : iteration.nextIteration;
 
             const nextIteration =
-              activeGroup === clickedGroup
+              activeGroup.activeGroup === clickedGroup
                 ? iteration.curIteration
                 : iteration.nextIteration;
+
             return {
               curIteration,
               nextIteration: isPosRight ? nextIteration + 1 : nextIteration - 1,
             };
           });
-          setActiveGroup(group);
-          setActiveImgIndex(index);
+          setActiveGroup((prev) => ({
+            activeGroup: group,
+            prevGroup: prev.activeGroup,
+          }));
+          setActiveImgIndex((prev) => ({
+            activeImgIndex: imgIndex,
+            prevActiveImgIndex: prev.activeImgIndex,
+          }));
         }}
-        position={[getPos(isActive, activeImgIndex, index), 0, 0]}
+        position={[0, 0, 0]}
       >
-        <planeGeometry args={[isActive ? activeWidth : width, height]} />
+        <planeGeometry args={[1, height]} />
         <shaderMaterial
           ref={shaderMaterial}
           vertexShader={vertexShader}

@@ -13,7 +13,7 @@ export default function Experience() {
       max: 10,
     },
     planeHeight: {
-      value: 5.5,
+      value: 5.63,
       step: 0.01,
       min: 0.01,
       max: 10,
@@ -45,7 +45,7 @@ export default function Experience() {
         position={[0, 0, 1]}
       />
 
-      <OrbitControls />
+      {/* <OrbitControls enableRotate={false} /> */}
 
       <ImgHolder
         activeWidth={activeWidth}
