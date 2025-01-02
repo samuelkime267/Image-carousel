@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import Experience from "./Experience";
 import { Leva } from "leva";
-import { Stats } from "@react-three/drei";
+// import { Stats } from "@react-three/drei";
 import { useMemo } from "react";
 
 export default function CanvasContainer() {
@@ -16,7 +16,7 @@ export default function CanvasContainer() {
 
   return (
     <div className="fixed top-0 left-0 w-full h-full">
-      <Leva collapsed />
+      <Leva collapsed hidden />
       <Canvas
         dpr={[1, 2]}
         orthographic
@@ -29,7 +29,7 @@ export default function CanvasContainer() {
           bottom: -camHeight / 2,
         }}
       >
-        <Stats />
+        {/* <Stats  /> */}
         <Experience />
       </Canvas>
     </div>

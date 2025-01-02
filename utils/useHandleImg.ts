@@ -1,7 +1,7 @@
 "use client";
 
 import * as THREE from "three";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTexture } from "@react-three/drei";
 import gsap from "gsap";
 import { imgType } from "@/typings";
@@ -27,6 +27,8 @@ export default function useHandleImg(
 ) {
   const isActive = imgIndex === activeImgIndex.activeImgIndex;
   const centerImgIndex = Math.floor(length / 2);
+
+  const [isHovered, setIsHovered] = useState(false);
 
   // This effect updates the plane width
   useEffect(() => {
@@ -105,12 +107,31 @@ export default function useHandleImg(
   useEffect(() => {
     if (!shaderMaterial.current) return;
 
+    if (isHovered) {
+      gsap.to(shaderMaterial.current.uniforms.uScale, {
+        value: 0.95,
+        duration: 0.3,
+      });
+    } else {
+      gsap.to(shaderMaterial.current.uniforms.uScale, {
+        value: 1,
+        duration: 0.3,
+      });
+    }
+
     if (isActive) {
+      gsap.to(shaderMaterial.current.uniforms.uProgress, { value: 1 });
+      return;
+    } else {
+      gsap.to(shaderMaterial.current.uniforms.uProgress, { value: 0 });
+    }
+
+    if (isHovered) {
       gsap.to(shaderMaterial.current.uniforms.uProgress, { value: 1 });
     } else {
       gsap.to(shaderMaterial.current.uniforms.uProgress, { value: 0 });
     }
-  }, [shaderMaterial, isActive]);
+  }, [shaderMaterial, isActive, isHovered]);
 
   const texture = useTexture(img);
 
@@ -125,6 +146,7 @@ export default function useHandleImg(
       },
       uTexture: { value: texture },
       uProgress: { value: 0 },
+      uScale: { value: 1 },
     };
 
     return uniforms;
@@ -163,5 +185,12 @@ export default function useHandleImg(
     }));
   };
 
-  return { uniforms, handleMeshClick };
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
+  return { uniforms, handleMeshClick, handleMouseEnter, handleMouseLeave };
 }

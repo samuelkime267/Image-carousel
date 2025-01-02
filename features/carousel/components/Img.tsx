@@ -10,15 +10,18 @@ import { imgType } from "@/typings";
 export default function Img(props: imgType) {
   const shaderMaterial = useRef<THREE.ShaderMaterial>(null);
   const planeMesh = useRef<THREE.Mesh>(null);
-  const { handleMeshClick, uniforms } = useHandleImg(
-    props,
-    shaderMaterial,
-    planeMesh
-  );
+  const { handleMeshClick, uniforms, handleMouseEnter, handleMouseLeave } =
+    useHandleImg(props, shaderMaterial, planeMesh);
 
   return (
     <>
-      <mesh ref={planeMesh} onClick={handleMeshClick} position={[0, 0, 0]}>
+      <mesh
+        ref={planeMesh}
+        onClick={handleMeshClick}
+        onPointerEnter={handleMouseEnter}
+        onPointerLeave={handleMouseLeave}
+        position={[0, 0, 0]}
+      >
         <planeGeometry args={[1, props.height]} />
         <shaderMaterial
           ref={shaderMaterial}

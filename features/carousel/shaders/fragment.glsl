@@ -1,4 +1,5 @@
 uniform float uProgress;
+uniform float uScale;
 uniform vec2 uRes;
 uniform vec2 uImgRes;
 uniform sampler2D uTexture;
@@ -31,11 +32,14 @@ vec4 desaturate(vec3 color) {
 
 
 void main(){
-  vec4 img = texture2D(uTexture, CoverUV(vUv, uRes, uImgRes));
+  vec2 scaledUv = (vUv - 0.5) * uScale + 0.5;
+  vec2 coveredUV = CoverUV(scaledUv, uRes, uImgRes);
+
+  vec4 img = texture2D(uTexture, coveredUV);
   vec4 desaturatedImg = desaturate(img.rgb);
   vec4 finalImg = mix(desaturatedImg, img, vec4(uProgress));
-  gl_FragColor = vec4(vUv, 0.,1.);
   gl_FragColor = img;
   gl_FragColor = desaturatedImg;
   gl_FragColor = finalImg;
+  // gl_FragColor = vec4(coveredUV, 0.,1.);
 }
