@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import activeImgSlice from "./activeImg/activeImg.slice";
+import loaderSlice from "./loader/loader.slice";
 
 const store = configureStore({
   reducer: {
     activeImg: activeImgSlice,
+    loader: loaderSlice,
   },
 });
 

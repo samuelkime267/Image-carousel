@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "@/styles/globals.scss";
 import { ReactLenis } from "lenis/react";
 import { fonts } from "@/data/fonts.data";
-import { Navbar, Footer } from "@/components";
+import { Navbar, Footer, Loader } from "@/components";
 import ReduxProvider from "@/lib/ReduxProvider";
 
 export const metadata: Metadata = {
@@ -20,6 +20,7 @@ export default function RootLayout({
       <ReduxProvider>
         <ReactLenis root>
           <body className={`${fonts} antialiased`}>
+            <Loader />
             <Navbar />
             {children}
             <Footer />
