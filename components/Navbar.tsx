@@ -4,7 +4,7 @@ import { navLinks } from "@/data/navLinks.data";
 
 export default function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 w-full p-4 flex items-center justify-between">
+    <nav className="fixed top-0 left-0 w-full p-4 flex items-center justify-between z-50">
       <Link className="capitalize font-philosopher text-xl" href="/">
         vision in motion
       </Link>

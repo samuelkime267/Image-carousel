@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
+import { useSelector } from "./useSelector";
+import useDurEase from "./useDurEase";
 
 type UseHandleImgHolderType = {
   planeWidth: number;
@@ -10,25 +12,18 @@ type UseHandleImgHolderType = {
   activeWidth: number;
 };
 
-export default function useHandleImgHolder(
-  { activeWidth, planeGap, planeWidth }: UseHandleImgHolderType,
-  centerImg: number,
-  length: number
-) {
+export default function useHandleImgHolder({
+  activeWidth,
+  planeGap,
+  planeWidth,
+}: UseHandleImgHolderType) {
   const { camera } = useThree();
 
-  const [activeImgIndex, setActiveImgIndex] = useState({
-    activeImgIndex: centerImg,
-    prevActiveImgIndex: centerImg,
-  });
-  const [activeGroup, setActiveGroup] = useState({
-    activeGroup: 0,
-    prevGroup: 0,
-  });
-  const [iteration, setIteration] = useState({
-    curIteration: 0,
-    nextIteration: 1,
-  });
+  const { centerImg, length, group, img, iteration } = useSelector(
+    (state) => state.activeImg
+  );
+
+  const { duration, ease } = useDurEase();
 
   // This function calculates the position of the group
   // Animation is not needed for this since it's instant function works well
@@ -36,7 +31,7 @@ export default function useHandleImgHolder(
     const groupWidth =
       planeWidth * (length - 1) + planeGap * length + activeWidth;
 
-    if (groupNum === activeGroup.activeGroup)
+    if (groupNum === group.activeGroup)
       return iteration.curIteration * groupWidth;
 
     return iteration.nextIteration * groupWidth;
@@ -47,13 +42,12 @@ export default function useHandleImgHolder(
     if (camera.type !== "OrthographicCamera") return;
     const cameraPosClone = camera.position.clone();
     let newCamPosX = 0;
-    const isSameGroup = activeGroup.activeGroup === activeGroup.prevGroup;
+    const isSameGroup = group.activeGroup === group.prevGroup;
 
     if (isSameGroup) {
       newCamPosX =
         cameraPosClone.x +
-        ((planeWidth + planeGap) * activeImgIndex.activeImgIndex -
-          activeImgIndex.prevActiveImgIndex);
+        ((planeWidth + planeGap) * img.activeImgIndex - img.prevActiveImgIndex);
     }
     if (!isSameGroup && iteration.curIteration > iteration.nextIteration) {
       // this is for forward movement when the active group changes
@@ -64,9 +58,7 @@ export default function useHandleImgHolder(
         cameraPosClone.x +
         adjustedWidth +
         (planeWidth + planeGap) *
-          (activeImgIndex.activeImgIndex +
-            length -
-            activeImgIndex.prevActiveImgIndex);
+          (img.activeImgIndex + length - img.prevActiveImgIndex);
     }
     if (!isSameGroup && iteration.curIteration < iteration.nextIteration) {
       // this is for backward movement when the active group changes
@@ -77,31 +69,26 @@ export default function useHandleImgHolder(
         cameraPosClone.x -
         (adjustedWidth +
           (planeWidth + planeGap) *
-            (length -
-              activeImgIndex.activeImgIndex +
-              activeImgIndex.prevActiveImgIndex));
+            (length - img.activeImgIndex + img.prevActiveImgIndex));
     }
 
-    gsap.to(camera.position, { x: newCamPosX });
+    gsap.to(camera.position, { x: newCamPosX, duration, ease });
   }, [
-    activeGroup,
+    group,
+    img,
     iteration,
-    activeImgIndex,
     camera,
     planeGap,
     planeWidth,
     centerImg,
     length,
     activeWidth,
+    duration,
+    ease,
   ]);
 
   return {
-    activeImgIndex,
-    setActiveImgIndex,
-    activeGroup,
-    setActiveGroup,
     iteration,
-    setIteration,
     calcGroupPosition,
   };
 }
