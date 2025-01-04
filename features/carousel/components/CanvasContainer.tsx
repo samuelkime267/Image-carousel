@@ -18,7 +18,8 @@ export default function CanvasContainer() {
     <div className="fixed top-0 left-0 w-full h-full">
       <Leva collapsed hidden />
       <Canvas
-        dpr={[1, 1.5]}
+        dpr={1}
+        // dpr={[1, 2]}
         orthographic
         camera={{
           position: [0, 0, 1],
