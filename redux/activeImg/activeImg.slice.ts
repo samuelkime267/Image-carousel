@@ -66,8 +66,8 @@ const activeImgSlice = createSlice({
     setAnimationFinished(state, action: { payload: boolean }) {
       state.animationFinished = action.payload;
     },
-    setActiveImgState(state, action: { payload: initialStateType }) {
-      state = action.payload;
+    setActiveImgState(_, action: { payload: initialStateType }) {
+      return action.payload;
     },
   },
 });

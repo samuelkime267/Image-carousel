@@ -10,11 +10,8 @@ import { useSelector } from "@/utils/useSelector";
 
 export default function Loader() {
   const { progress, total } = useProgress();
-  console.log(progress, total);
 
-  const { isLoading, loadingType, showLoader } = useSelector(
-    (state) => state.loader
-  );
+  const { loadingType, showLoader } = useSelector((state) => state.loader);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -23,8 +20,6 @@ export default function Loader() {
   useEffect(() => {
     if (!containerRef.current) return;
     const handleLoadingFinish = () => {
-      console.log("loading finish");
-
       dispatch(setIsLoading(false));
     };
 
@@ -51,15 +46,6 @@ export default function Loader() {
           },
         });
 
-      if (total === 0) {
-        const timeout = setTimeout(() => {
-          tl.play();
-        }, 500);
-        return () => {
-          clearTimeout(timeout);
-        };
-      }
-
       if (progress === 100) {
         tl.play();
         return;
@@ -68,7 +54,7 @@ export default function Loader() {
     return () => {
       ctx.revert();
     };
-  }, [progress, dispatch, total]);
+  }, [progress, dispatch]);
 
   useEffect(() => {
     const pageContainer = document.getElementById("page-container");

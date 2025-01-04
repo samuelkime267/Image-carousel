@@ -27,6 +27,7 @@ const loaderSlice = createSlice({
     setPageTransitionStart(state) {
       state.loadingType = "page-transition";
       state.showLoader = true;
+      // state.isLoading = true;
     },
     setShowLoader(state, action: { payload: boolean }) {
       state.showLoader = action.payload;

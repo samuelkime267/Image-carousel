@@ -34,6 +34,7 @@ export default function useHandleImg(
     iteration,
     animationFinished,
   } = useSelector((state) => state.activeImg);
+
   const dispatch = useDispatch();
   const isActive = imgIndex === activeImgIndex;
   const { duration, ease } = useDurEase();
