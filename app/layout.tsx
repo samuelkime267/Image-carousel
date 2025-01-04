@@ -21,9 +21,11 @@ export default function RootLayout({
         <ReactLenis root>
           <body className={`${fonts} antialiased`}>
             <Loader />
-            <Navbar />
-            {children}
-            <Footer />
+            <div id="page-container">
+              <Navbar />
+              {children}
+              <Footer />
+            </div>
           </body>
         </ReactLenis>
       </ReduxProvider>

@@ -15,6 +15,8 @@ type SectionNameProp = {
   animationFinished: boolean;
 };
 
+let isInitial = true;
+
 export default function SectionName({
   index,
   img: { activeImgIndex, prevActiveImgIndex },
@@ -24,6 +26,7 @@ export default function SectionName({
   const headerRef = useRef<HTMLHeadingElement>(null);
   const isActive = index === activeImgIndex;
   const isPrev = index === prevActiveImgIndex;
+  const isSame = index === activeImgIndex && index === prevActiveImgIndex;
 
   useEffect(() => {
     if (!headerRef.current || !animationFinished) return;
@@ -32,33 +35,55 @@ export default function SectionName({
       const q = gsap.utils.selector(headerRef.current);
       const titleChars = q(".header-chars");
 
-      if (isActive) {
-        gsap.to(titleChars, {
-          y: 0,
-          stagger: 0.04,
-          ease: "power3.inOut",
-          duration: 0.5,
-        });
-        return;
-      }
-      if (isPrev) {
-        gsap.fromTo(
-          titleChars,
-          { y: 0 },
-          {
-            y: "-100%",
+      const showText: (isPrev?: boolean) => void = (isPrev) => {
+        if (!isPrev) {
+          gsap.to(titleChars, {
+            y: 0,
             stagger: 0.04,
             ease: "power3.inOut",
             duration: 0.5,
-          }
-        );
+          });
+        } else {
+          gsap.fromTo(
+            titleChars,
+            { y: 0 },
+            {
+              y: "-100%",
+              stagger: 0.04,
+              ease: "power3.inOut",
+              duration: 0.5,
+            }
+          );
+        }
+      };
+
+      if (isActive && isPrev) {
+        if (isInitial) {
+          showText();
+        } else {
+          gsap.set(titleChars, { y: 0 });
+        }
+
+        isInitial = false;
+        return;
+      }
+
+      if (isActive) {
+        showText();
+
+        isInitial = false;
+        return;
+      }
+      if (isPrev) {
+        showText(isPrev);
+        isInitial = false;
       }
     });
 
     return () => {
       ctx.revert();
     };
-  }, [isActive, isPrev, animationFinished]);
+  }, [isActive, isPrev, animationFinished, isSame]);
 
   return (
     <div className="absolute top-0 left-0 overflow-hidden">

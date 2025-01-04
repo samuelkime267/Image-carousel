@@ -5,11 +5,13 @@ type loadingType = "initial" | "page-transition";
 type initialStateType = {
   isLoading: boolean;
   loadingType: loadingType;
+  showLoader: boolean;
 };
 
 const initialState: initialStateType = {
   isLoading: true,
   loadingType: "initial",
+  showLoader: false,
 };
 
 const loaderSlice = createSlice({
@@ -24,10 +26,14 @@ const loaderSlice = createSlice({
     },
     setPageTransitionStart(state) {
       state.loadingType = "page-transition";
-      state.isLoading = true;
+      state.showLoader = true;
+    },
+    setShowLoader(state, action: { payload: boolean }) {
+      state.showLoader = action.payload;
     },
   },
 });
 
-export const { setIsLoading } = loaderSlice.actions;
+export const { setIsLoading, setPageTransitionStart, setShowLoader } =
+  loaderSlice.actions;
 export default loaderSlice.reducer;

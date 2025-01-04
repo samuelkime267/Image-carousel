@@ -14,12 +14,21 @@ type imgType = {
   activeImgIndex: number;
   prevActiveImgIndex: number;
 };
-type initialStateType = {
+type lengthCenterImgType = {
   length: number;
   centerImg: number;
 };
 
-const initialState = {
+type initialStateType = {
+  group: groupType;
+  iteration: iterationType;
+  img: imgType;
+  centerImg: number;
+  length: number;
+  animationFinished: boolean;
+};
+
+export const initialState: initialStateType = {
   group: {
     activeGroup: 0,
     prevGroup: 0,
@@ -50,12 +59,15 @@ const activeImgSlice = createSlice({
     setImg(state, action: { payload: imgType }) {
       state.img = action.payload;
     },
-    setInitials(state, action: { payload: initialStateType }) {
+    setInitials(state, action: { payload: lengthCenterImgType }) {
       state.centerImg = action.payload.centerImg;
       state.length = action.payload.length;
     },
     setAnimationFinished(state, action: { payload: boolean }) {
       state.animationFinished = action.payload;
+    },
+    setActiveImgState(state, action: { payload: initialStateType }) {
+      state = action.payload;
     },
   },
 });
@@ -66,6 +78,7 @@ export const {
   setIteration,
   setInitials,
   setAnimationFinished,
+  setActiveImgState,
 } = activeImgSlice.actions;
 
 export default activeImgSlice.reducer;

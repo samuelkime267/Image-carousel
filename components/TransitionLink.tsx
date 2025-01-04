@@ -1,6 +1,7 @@
 import React from "react";
 import Link, { LinkProps } from "next/link";
 import { useRouter } from "next/navigation";
+import sleep from "@/utils/sleep";
 
 interface TransitionLinkProps extends LinkProps {
   children: React.ReactNode;
@@ -16,7 +17,6 @@ export default function TransitionLink({
   runBefore,
   ...props
 }: TransitionLinkProps) {
-  const sleep = async (ms: number) => new Promise((r) => setTimeout(r, ms));
   const router = useRouter();
 
   const handleTransition = async (

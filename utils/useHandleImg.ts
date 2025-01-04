@@ -13,7 +13,14 @@ import {
   setIteration,
   setAnimationFinished,
 } from "@/redux/activeImg/activeImg.slice";
+import { resetActiveImgAction } from "@/redux/activeImg/activeImg.action";
 import useDurEase from "./useDurEase";
+import { useRouter } from "next/navigation";
+import {
+  setPageTransitionStart,
+  setShowLoader,
+} from "@/redux/loader/loader.slice";
+import sleep from "./sleep";
 
 export default function useHandleImg(
   { activeWidth, gap, group, height, img, imgIndex, width }: imgType,
@@ -31,10 +38,12 @@ export default function useHandleImg(
   const isActive = imgIndex === activeImgIndex;
   const { duration, ease } = useDurEase();
   const [isHovered, setIsHovered] = useState(false);
+  const { isLoading } = useSelector((state) => state.loader);
 
   // This effect updates the plane width
   useEffect(() => {
     if (!planeMesh.current) return;
+    if (isLoading) return;
     if (isActive) {
       gsap.to(planeMesh.current.scale, {
         x: activeWidth,
@@ -48,12 +57,13 @@ export default function useHandleImg(
         ease,
       });
     }
-  }, [isActive, activeWidth, width, planeMesh, duration, ease]);
+  }, [isActive, activeWidth, width, planeMesh, duration, ease, isLoading]);
 
   // This effect updates the plane resolution in the shader
   useEffect(() => {
     if (!shaderMaterial.current) return;
 
+    if (isLoading) return;
     if (isActive) {
       gsap.to(shaderMaterial.current.uniforms.uRes.value, {
         x: activeWidth,
@@ -69,7 +79,16 @@ export default function useHandleImg(
         ease,
       });
     }
-  }, [height, width, isActive, activeWidth, shaderMaterial, duration, ease]);
+  }, [
+    height,
+    width,
+    isActive,
+    activeWidth,
+    shaderMaterial,
+    duration,
+    ease,
+    isLoading,
+  ]);
 
   // This effect updates the plane position
   useEffect(() => {
@@ -101,6 +120,8 @@ export default function useHandleImg(
         distanceToFirstImg + (width + gap) * (imgIndex - centerImg - 1);
     }
 
+    if (isLoading) return;
+
     gsap.to(planeMesh.current.position, {
       x: position,
       duration,
@@ -122,6 +143,7 @@ export default function useHandleImg(
     dispatch,
     animationFinished,
     ease,
+    isLoading,
   ]);
 
   // This effect updates the image saturation
@@ -174,12 +196,27 @@ export default function useHandleImg(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [texture]);
 
-  const handleMeshClick = () => {
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+
+  const router = useRouter();
+
+  const handleMeshClick = async () => {
     if (!animationFinished) return;
     const clickedGroup = group;
     const isCenter = imgIndex === centerImg;
     const isPosRight = imgIndex > centerImg;
     const isCurrentGroup = clickedGroup === stateGroup.activeGroup;
+
+    if (activeImgIndex === imgIndex) {
+      dispatch(setPageTransitionStart());
+      await sleep(1500);
+      dispatch(resetActiveImgAction());
+      router.push(`/category/${imgIndex}`);
+      await sleep(1500);
+      dispatch(setShowLoader(false));
+      return;
+    }
 
     if (!isCenter) {
       const curIteration = isCurrentGroup
@@ -203,13 +240,6 @@ export default function useHandleImg(
     dispatch(
       setImg({ activeImgIndex: imgIndex, prevActiveImgIndex: activeImgIndex })
     );
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-  const handleMouseLeave = () => {
-    setIsHovered(false);
   };
 
   return { uniforms, handleMeshClick, handleMouseEnter, handleMouseLeave };

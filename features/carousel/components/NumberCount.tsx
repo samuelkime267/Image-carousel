@@ -13,6 +13,8 @@ type NumberCountProps = {
   animationFinished: boolean;
 };
 
+let isInitial = true;
+
 export default function NumberCount({
   index,
   img: { activeImgIndex, prevActiveImgIndex },
@@ -27,12 +29,23 @@ export default function NumberCount({
     const ctx = gsap.context(() => {
       const pEl = pRef.current;
 
+      if (isActive && isPrev) {
+        if (isInitial) {
+          gsap.to(pEl, { y: 0, duration: 0.5 });
+        } else {
+          gsap.set(pEl, { y: 0 });
+        }
+        isInitial = false;
+      }
+
       if (isActive) {
         gsap.to(pEl, { y: 0, duration: 0.5 });
+        isInitial = false;
         return;
       }
       if (isPrev) {
         gsap.fromTo(pEl, { y: 0 }, { y: "-100%", duration: 0.5 });
+        isInitial = false;
       }
     });
 

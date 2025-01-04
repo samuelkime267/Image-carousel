@@ -3,18 +3,22 @@
 import { useProgress } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import { useDispatch } from "@/utils/useDispatch";
-// import { useSelector } from "@/utils/useSelector";
 import { setIsLoading } from "@/redux/loader/loader.slice";
 import gsap from "gsap";
 import { cn } from "@/utils/cn";
+import { useSelector } from "@/utils/useSelector";
 
 export default function Loader() {
-  const { progress } = useProgress();
-  // const [prevProgress, setPrevProgress] = useState(0);
+  const { progress, total } = useProgress();
+  console.log(progress, total);
+
+  const { isLoading, loadingType, showLoader } = useSelector(
+    (state) => state.loader
+  );
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useDispatch();
-  // const { isLoading } = useSelector((state) => state.loader);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -30,31 +34,68 @@ export default function Loader() {
       const counter = q(".counter");
       const scaleContainer = q(".scale-container");
 
-      gsap.to(counter, {
+      const tl = gsap.timeline({ paused: true });
+      tl.to(counter, {
         innerText: progress,
         snap: { innerText: 1 },
-        onComplete() {
-          if (progress === 100) {
-            gsap.to(scaleContainer, {
-              scale: 1,
-              ease: "power1.inOut",
-              onComplete() {
-                gsap.to(container, {
-                  opacity: 0,
-                  onComplete: () => {
-                    handleLoadingFinish();
-                  },
-                });
-              },
-            });
-          }
-        },
-      });
+      })
+        .to(scaleContainer, {
+          scale: 1,
+          duration: 1,
+          ease: "power3.in",
+        })
+        .to(container, {
+          opacity: 0,
+          onComplete: () => {
+            handleLoadingFinish();
+          },
+        });
+
+      if (total === 0) {
+        const timeout = setTimeout(() => {
+          tl.play();
+        }, 500);
+        return () => {
+          clearTimeout(timeout);
+        };
+      }
+
+      if (progress === 100) {
+        tl.play();
+        return;
+      }
     });
     return () => {
       ctx.revert();
     };
-  }, [progress, dispatch]);
+  }, [progress, dispatch, total]);
+
+  useEffect(() => {
+    const pageContainer = document.getElementById("page-container");
+    if (!containerRef.current || !pageContainer || loadingType === "initial")
+      return;
+
+    const ctx = gsap.context(() => {
+      const container = containerRef.current;
+      const q = gsap.utils.selector(container);
+      const scaleContainer = q(".scale-container");
+
+      const tl = gsap.timeline({ paused: true });
+      tl.to(container, {
+        opacity: 1,
+      }).to(scaleContainer, {
+        scale: 0,
+        duration: 1,
+        ease: "power3.in",
+      });
+
+      if (showLoader) tl.play();
+      if (!showLoader) tl.reverse(0);
+    });
+    return () => {
+      ctx.revert();
+    };
+  }, [loadingType, showLoader]);
 
   return (
     <div
@@ -71,11 +112,13 @@ export default function Loader() {
           </p>
         </div>
 
-        <div className="mt-auto mr-auto p-4">
+        <div
+          className={cn("mt-auto mr-auto p-4 opacity-0", {
+            "opacity-100": loadingType === "initial" && total > 0,
+          })}
+        >
           <p className="text-7xl text-white counter">0</p>
         </div>
-
-        {/* <div className="absolute top-1/2 -translate-y-1/2 left-0 w-0 h-0.5 bg-white z-[2]" /> */}
       </div>
     </div>
   );
