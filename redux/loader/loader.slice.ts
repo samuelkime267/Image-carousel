@@ -1,17 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-type loadingType = "initial" | "page-transition";
-
 type initialStateType = {
   isLoading: boolean;
-  loadingType: loadingType;
   showLoader: boolean;
 };
 
 const initialState: initialStateType = {
   isLoading: true,
-  loadingType: "initial",
-  showLoader: false,
+  showLoader: true,
 };
 
 const loaderSlice = createSlice({
@@ -21,13 +17,13 @@ const loaderSlice = createSlice({
     setIsLoading: (state, action) => {
       state.isLoading = action.payload;
     },
-    setLoadingType: (state, action: { payload: loadingType }) => {
-      state.loadingType = action.payload;
-    },
     setPageTransitionStart(state) {
-      state.loadingType = "page-transition";
       state.showLoader = true;
-      // state.isLoading = true;
+      state.isLoading = true;
+    },
+    setPageTransitionEnd(state) {
+      state.showLoader = false;
+      state.isLoading = false;
     },
     setShowLoader(state, action: { payload: boolean }) {
       state.showLoader = action.payload;
@@ -35,6 +31,10 @@ const loaderSlice = createSlice({
   },
 });
 
-export const { setIsLoading, setPageTransitionStart, setShowLoader } =
-  loaderSlice.actions;
+export const {
+  setIsLoading,
+  setPageTransitionStart,
+  setShowLoader,
+  setPageTransitionEnd,
+} = loaderSlice.actions;
 export default loaderSlice.reducer;

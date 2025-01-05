@@ -18,7 +18,7 @@ import useDurEase from "./useDurEase";
 import { useRouter } from "next/navigation";
 import {
   setPageTransitionStart,
-  setShowLoader,
+  setPageTransitionEnd,
 } from "@/redux/loader/loader.slice";
 import sleep from "./sleep";
 
@@ -215,7 +215,7 @@ export default function useHandleImg(
       dispatch(resetActiveImgAction());
       router.push(`/category/${imgIndex}`);
       await sleep(1500);
-      dispatch(setShowLoader(false));
+      dispatch(setPageTransitionEnd());
       return;
     }
 

@@ -3,85 +3,136 @@
 import { useProgress } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import { useDispatch } from "@/utils/useDispatch";
-import { setIsLoading } from "@/redux/loader/loader.slice";
+import { setIsLoading, setShowLoader } from "@/redux/loader/loader.slice";
 import gsap from "gsap";
 import { cn } from "@/utils/cn";
 import { useSelector } from "@/utils/useSelector";
+import { usePathname } from "next/navigation";
+import { webglPath } from "@/data/routes.data";
+
+let isInitial = true;
 
 export default function Loader() {
+  const pathname = usePathname();
   const { progress, total } = useProgress();
 
-  const { loadingType, showLoader } = useSelector((state) => state.loader);
+  const { showLoader } = useSelector((state) => state.loader);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const handleLoadingFinish = () => {
-      dispatch(setIsLoading(false));
-    };
-
-    const ctx = gsap.context(() => {
-      const container = containerRef.current;
-      const q = gsap.utils.selector(container);
-      const counter = q(".counter");
-      const scaleContainer = q(".scale-container");
-
-      const tl = gsap.timeline({ paused: true });
-      tl.to(counter, {
-        innerText: progress,
-        snap: { innerText: 1 },
-      })
-        .to(scaleContainer, {
-          scale: 1,
-          duration: 1,
-          ease: "power3.in",
-        })
-        .to(container, {
-          opacity: 0,
-          onComplete: () => {
-            handleLoadingFinish();
-          },
-        });
-
-      if (progress === 100) {
-        tl.play();
-        return;
-      }
-    });
-    return () => {
-      ctx.revert();
-    };
-  }, [progress, dispatch]);
-
+  // this handles showing and hiding the loader
   useEffect(() => {
     const pageContainer = document.getElementById("page-container");
-    if (!containerRef.current || !pageContainer || loadingType === "initial")
-      return;
+    if (!containerRef.current || !pageContainer || isInitial) return;
 
     const ctx = gsap.context(() => {
       const container = containerRef.current;
       const q = gsap.utils.selector(container);
       const scaleContainer = q(".scale-container");
 
-      const tl = gsap.timeline({ paused: true });
-      tl.to(container, {
-        opacity: 1,
-      }).to(scaleContainer, {
-        scale: 0,
-        duration: 1,
-        ease: "power3.in",
-      });
-
-      if (showLoader) tl.play();
-      if (!showLoader) tl.reverse(0);
+      if (showLoader) {
+        const tl = gsap.timeline();
+        tl.fromTo(
+          container,
+          {
+            opacity: 0,
+          },
+          {
+            opacity: 1,
+            onStart: () => {
+              dispatch(setIsLoading(true));
+            },
+          }
+        ).fromTo(
+          scaleContainer,
+          {
+            scale: 1,
+          },
+          {
+            scale: 0,
+            duration: 1,
+            ease: "power3.in",
+          }
+        );
+        return;
+      }
+      if (!showLoader) {
+        const tl = gsap.timeline();
+        tl.fromTo(
+          scaleContainer,
+          {
+            scale: 0,
+          },
+          {
+            scale: 1,
+            duration: 1,
+            ease: "power3.in",
+          }
+        ).fromTo(
+          container,
+          {
+            opacity: 1,
+          },
+          {
+            opacity: 0,
+            onComplete: () => {
+              dispatch(setIsLoading(false));
+            },
+          }
+        );
+      }
     });
+
     return () => {
       ctx.revert();
     };
-  }, [loadingType, showLoader]);
+  }, [showLoader, dispatch]);
+
+  // handles initial load if three js is used
+  useEffect(() => {
+    const isWebgl = webglPath.includes(pathname);
+
+    if (!containerRef.current || !isWebgl) return;
+    const handleLoadingFinish = () => {
+      isInitial = false;
+      dispatch(setShowLoader(false));
+    };
+
+    const ctx = gsap.context(() => {
+      if (progress === 100) {
+        const counter = gsap.utils.selector(containerRef.current)(".counter");
+        const tl = gsap.timeline();
+
+        tl.to(counter, { opacity: 1 })
+          .to(counter, {
+            innerText: progress,
+            snap: { innerText: 1 },
+          })
+          .to(counter, {
+            opacity: 0,
+            onComplete: handleLoadingFinish,
+          });
+      }
+    });
+
+    return () => ctx.revert();
+  }, [progress, dispatch, total, pathname]);
+
+  // handles initial load if no three js is used
+  useEffect(() => {
+    const isWebgl = webglPath.includes(pathname);
+
+    if (isInitial && !isWebgl) {
+      const timeout = setTimeout(() => {
+        isInitial = false;
+        dispatch(setShowLoader(false));
+      }, 1500);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [pathname, dispatch]);
 
   return (
     <div
@@ -98,13 +149,14 @@ export default function Loader() {
           </p>
         </div>
 
-        <div
-          className={cn("mt-auto mr-auto p-4 opacity-0", {
-            "opacity-100": loadingType === "initial" && total > 0,
-          })}
+        <p
+          className={cn(
+            "mt-auto mr-auto p-4 opacity-0 text-7xl text-white counter",
+            { "opacity-100": isInitial && total > 0 }
+          )}
         >
-          <p className="text-7xl text-white counter">0</p>
-        </div>
+          0
+        </p>
       </div>
     </div>
   );
