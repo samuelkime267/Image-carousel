@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { cn } from "@/utils/cn";
 import splitText from "@/utils/splitText";
 import gsap from "gsap";
+import { useSelector } from "@/utils/useSelector";
 
 type SectionNameProp = {
   index: number;
@@ -27,6 +28,13 @@ export default function SectionName({
   const isActive = index === activeImgIndex;
   const isPrev = index === prevActiveImgIndex;
   const isSame = index === activeImgIndex && index === prevActiveImgIndex;
+  const { isLoading } = useSelector((state) => state.loader);
+
+  useEffect(() => {
+    if (isLoading) {
+      isInitial = true;
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (!headerRef.current || !animationFinished) return;

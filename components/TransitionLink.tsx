@@ -1,38 +1,47 @@
+"use client";
+
 import React from "react";
 import Link, { LinkProps } from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import sleep from "@/utils/sleep";
+import { useDispatch } from "@/utils/useDispatch";
+import {
+  setPageTransitionEnd,
+  setPageTransitionStart,
+} from "@/redux/loader/loader.slice";
+import { webglPath } from "@/data/routes.data";
 
 interface TransitionLinkProps extends LinkProps {
   children: React.ReactNode;
   href: string;
-  callback?: () => void;
-  runBefore?: boolean;
+  callback?: () => Promise<void>;
+  className?: string;
 }
 
 export default function TransitionLink({
   children,
   href,
   callback,
-  runBefore,
   ...props
 }: TransitionLinkProps) {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const pathname = usePathname();
 
   const handleTransition = async (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
     e.preventDefault();
+    if (pathname === href) return;
 
-    // run exit animation here
+    dispatch(setPageTransitionStart());
     await sleep(1000);
 
-    if (runBefore && callback) callback();
     router.push(href);
-    if (!runBefore && callback) callback();
+    if (callback) await callback();
 
-    // run entry animation here
     await sleep(1000);
+    if (!webglPath.includes(href)) dispatch(setPageTransitionEnd());
   };
 
   return (

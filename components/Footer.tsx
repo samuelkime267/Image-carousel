@@ -1,9 +1,19 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { cn } from "@/utils/cn";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+
   return (
-    <footer className="fixed bottom-0 left-0 w-full p-4 flex items-center justify-between">
+    <footer
+      className={cn("w-full p-4 flex items-center justify-between", {
+        "fixed bottom-0 left-0": pathname === "/",
+      })}
+    >
       <div className="flex items-start justify-start flex-col group gap-[1px]">
         <Link
           href={"https://www.linkedin.com/in/samuelkime"}

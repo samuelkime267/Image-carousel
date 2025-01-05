@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/utils/cn";
 import gsap from "gsap";
+import { useSelector } from "@/utils/useSelector";
 
 type NumberCountProps = {
   index: number;
@@ -23,6 +24,14 @@ export default function NumberCount({
   const pRef = useRef<HTMLParagraphElement>(null);
   const isActive = index === activeImgIndex;
   const isPrev = index === prevActiveImgIndex;
+
+  const { isLoading } = useSelector((state) => state.loader);
+
+  useEffect(() => {
+    if (isLoading) {
+      isInitial = true;
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (!pRef.current || !animationFinished) return;

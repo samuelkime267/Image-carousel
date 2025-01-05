@@ -41,9 +41,6 @@ export default function Loader() {
           },
           {
             opacity: 1,
-            onStart: () => {
-              dispatch(setIsLoading(true));
-            },
           }
         ).fromTo(
           scaleContainer,
@@ -52,8 +49,11 @@ export default function Loader() {
           },
           {
             scale: 0,
-            duration: 1,
+            duration: 0.7,
             ease: "power3.in",
+            onStart: () => {
+              dispatch(setIsLoading(true));
+            },
           }
         );
         return;
@@ -67,7 +67,7 @@ export default function Loader() {
           },
           {
             scale: 1,
-            duration: 1,
+            duration: 0.7,
             ease: "power3.in",
           }
         ).fromTo(
@@ -128,7 +128,7 @@ export default function Loader() {
       const timeout = setTimeout(() => {
         isInitial = false;
         dispatch(setShowLoader(false));
-      }, 1500);
+      }, 1000);
 
       return () => clearTimeout(timeout);
     }
@@ -144,7 +144,7 @@ export default function Loader() {
       <div className="relative w-full h-full flex items-center justify-center flex-col">
         <div className="scale-container absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-white z-[2] scale-0 " />
         <div className="mt-auto absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <p className="logo-text font-philosopher text-3xl uppercase text-white text-nowrap text-center">
+          <p className="logo-text font-philosopher text-3xl uppercase text-white text-nowrap text-center animate-pulse">
             Vision in motion
           </p>
         </div>
