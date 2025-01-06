@@ -47,11 +47,9 @@ export default function ImagesGallery({ images, name }: ImagesGalleryProps) {
           if (i % 2 === 0) return;
           return (
             <div key={i} className="clip-me">
-              <Image
+              <img
                 src={image}
                 alt={name}
-                width={650}
-                height={950}
                 className="w-full h-full object-cover bg-gray-400"
               />
             </div>
@@ -63,11 +61,9 @@ export default function ImagesGallery({ images, name }: ImagesGalleryProps) {
           if (i % 2 !== 0) return;
           return (
             <div key={i} className="clip-me">
-              <Image
+              <img
                 src={image}
                 alt={name}
-                width={650}
-                height={950}
                 className="w-full h-full object-cover bg-gray-400"
               />
             </div>
