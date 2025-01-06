@@ -50,9 +50,9 @@ export default function ImagesGallery({ images, name }: ImagesGalleryProps) {
               <Image
                 src={image}
                 alt={name}
-                width={1200}
-                height={720}
-                className="w-full h-full object-cover"
+                width={650}
+                height={950}
+                className="w-full h-full object-cover bg-gray-400"
               />
             </div>
           );
@@ -66,9 +66,9 @@ export default function ImagesGallery({ images, name }: ImagesGalleryProps) {
               <Image
                 src={image}
                 alt={name}
-                width={1200}
-                height={720}
-                className="w-full h-full object-cover"
+                width={650}
+                height={950}
+                className="w-full h-full object-cover bg-gray-400"
               />
             </div>
           );
