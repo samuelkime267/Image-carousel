@@ -20,7 +20,7 @@ export default function ImagesGallery({ images, name }: ImagesGalleryProps) {
     const ctx = gsap.context(() => {
       const clippedImgs = gsap.utils.selector(sectionRef.current)(".clip-me");
 
-      clippedImgs.forEach((clippedImg, i) => {
+      clippedImgs.forEach((clippedImg) => {
         gsap.to(clippedImg, {
           clipPath: "inset(0% 0% 0% 0%)",
           duration: 1.25,
