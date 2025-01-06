@@ -9,8 +9,8 @@ type ImagesGalleryProps = {
 
 export default function ImagesGallery({ images, name }: ImagesGalleryProps) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
-      <div className="grid grid-cols-1 gap-4 h-fit">
+    <section className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 px-4">
+      <div className="grid grid-cols-1 gap-2 md:gap-4 h-fit">
         {images.slice(1).map((image, i) => {
           if (i % 2 !== 0) return;
           return (
@@ -20,7 +20,7 @@ export default function ImagesGallery({ images, name }: ImagesGalleryProps) {
           );
         })}
       </div>
-      <div className="grid grid-cols-1 gap-4 h-fit">
+      <div className="grid grid-cols-1 gap-2 md:gap-4 h-fit">
         {images.slice(1).map((image, i) => {
           if (i % 2 === 0) return;
           return (

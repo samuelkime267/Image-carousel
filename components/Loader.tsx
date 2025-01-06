@@ -9,11 +9,13 @@ import { cn } from "@/utils/cn";
 import { useSelector } from "@/utils/useSelector";
 import { usePathname } from "next/navigation";
 import { webglPath } from "@/data/routes.data";
+import useWindowSize from "@/utils/useWindowSize";
 
 let isInitial = true;
 
 export default function Loader() {
   const pathname = usePathname();
+  const { width } = useWindowSize();
   const { progress, total } = useProgress();
 
   const { showLoader } = useSelector((state) => state.loader);
@@ -124,6 +126,12 @@ export default function Loader() {
   useEffect(() => {
     const isWebgl = webglPath.includes(pathname);
 
+    if (pathname === "/" && width < 768 && width !== 0) {
+      isInitial = false;
+      dispatch(setShowLoader(false));
+      return;
+    }
+
     if (isInitial && !isWebgl) {
       const timeout = setTimeout(() => {
         isInitial = false;
@@ -132,7 +140,7 @@ export default function Loader() {
 
       return () => clearTimeout(timeout);
     }
-  }, [pathname, dispatch]);
+  }, [pathname, dispatch, width]);
 
   return (
     <div

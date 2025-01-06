@@ -16,12 +16,14 @@ interface TransitionLinkProps extends LinkProps {
   href: string;
   callback?: () => Promise<void>;
   className?: string;
+  endTransition?: boolean;
 }
 
 export default function TransitionLink({
   children,
   href,
   callback,
+  endTransition,
   ...props
 }: TransitionLinkProps) {
   const router = useRouter();
@@ -41,7 +43,8 @@ export default function TransitionLink({
     if (callback) await callback();
 
     await sleep(1000);
-    if (!webglPath.includes(href)) dispatch(setPageTransitionEnd());
+    if (!webglPath.includes(href) || endTransition)
+      dispatch(setPageTransitionEnd());
   };
 
   return (
